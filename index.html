@@ -23,34 +23,96 @@
             color: #666;
             margin-top: 0;
             font-size: 14px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
-        /* ファイル入力エリア */
-        .file-input-area {
+        
+        /* 解説・ガイドセクション */
+        .guide-section {
             background-color: #ffffff;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             width: 100%;
-            max-width: 500px;
-            margin-bottom: 20px;
+            max-width: 550px;
+            margin-bottom: 25px;
+            box-sizing: border-box;
+        }
+        .guide-section h2 {
+            font-size: 18px;
+            color: #1a73e8;
+            margin-top: 0;
+            border-bottom: 2px solid #e8f0fe;
+            padding-bottom: 8px;
+        }
+        .guide-section h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .guide-section ol {
+            padding-left: 20px;
+            margin: 0 0 15px 0;
+            font-size: 14px;
+            color: #444;
+            line-height: 1.6;
+        }
+        
+        /* プロンプトボックス */
+        .prompt-box {
+            background-color: #f8f9fa;
+            border: 1px solid #dadce0;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #333;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .btn-copy {
+            background-color: #f1f3f4;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-copy:hover {
+            background-color: #e8eaed;
+        }
+
+        /* ファイル入力エリア */
+        .file-input-area {
+            background-color: #e8f0fe;
+            padding: 25px 20px;
+            border-radius: 12px;
+            border: 2px dashed #1a73e8;
+            width: 100%;
+            max-width: 550px;
+            margin-bottom: 25px;
             text-align: center;
             box-sizing: border-box;
-            border: 2px dashed #ccc;
         }
         .file-input-area input {
             font-size: 16px;
             margin-top: 10px;
+            cursor: pointer;
         }
+
         /* コントロールパネルのスタイル */
         .control-panel {
             background-color: #ffffff;
             padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             width: 100%;
-            max-width: 500px;
-            margin-bottom: 20px;
+            max-width: 550px;
+            margin-bottom: 25px;
             box-sizing: border-box;
             display: none; /* 最初は非表示 */
         }
@@ -105,7 +167,7 @@
         /* 単語カードのスタイル */
         .container {
             width: 100%;
-            max-width: 500px;
+            max-width: 550px;
             display: block;
         }
         .card-wrapper {
@@ -189,10 +251,53 @@
 <body>
 
     <h1>CSVカスタム単語帳</h1>
-    <p class="subtitle" id="status-msg">CSVファイルを読み込んでください</p>
+    <p class="subtitle" id="status-msg">お手持ちのCSVファイルを読み込んで自作の単語帳で勉強できます</p>
+
+    <div class="guide-section" id="guide-area">
+        <h2>💡 AIで単語帳CSVを作る手順 & 使い方</h2>
+        
+        <h3>1. GeminiでCSVを生成する</h3>
+        <ol>
+            <li>下の「プロンプトをコピー」ボタンを押します。</li>
+            <li>Gemini（AI）のチャット欄に貼り付けます。</li>
+            <li>続けて、教科書の写真や単語リストのテキストを一緒に送信します。</li>
+            <li>出力された「```csv」で始まるデータ部分をすべてコピーします。</li>
+            <li>パソコンのメモ帳等に貼り付け、ファイル名を「<strong>tango.csv</strong>」にして保存します（文字コードはUTF-8推奨）。</li>
+        </ol>
+
+        <h3>専用プロンプト</h3>
+        <div class="prompt-box" id="prompt-text">以下のルールに従って、提供する情報から英単語帳用のCSVデータを作成してください。
+出力は、テキストエリア等からコピペしてそのまま「.csv」として保存できるように、コードブロック（```csv ~ ```）の形式で出力してください。また、解説や前置き、結びの言葉などの余計な文章は一切含めず、CSVデータのみを出力してください。
+
+【CSVのフォーマットルール】
+1. 1行目は必ず以下の通りのヘッダーにしてください（すべて半角英小文字）。
+no,en,ja
+
+2. 2行目以降に、1データ1行で単語情報を記述してください。
+・no: 単語番号（数字）。番号がない場合は1からの連番にしてください。
+・en: 見出しの英単語
+・ja: 日本語の主要な意味・訳（意味が複数ある場合は「；」や「、」で区切ってください）
+
+3. 日本語訳の項目の中に「,（カンマ）」が含まれるとCSVが壊れてしまうため、カンマは絶対に使わず、すべて「、」や「；」に置換してください。もし項目全体をダブルクォーテーションで囲む処理ができるなら施してください。
+
+【出力イメージ】
+no,en,ja
+244,popularity,"人気；流行"
+245,population,"人口；個体数；住民"
+
+【単語データ / 画像】
+（ここにテキストを貼り付けるか、画像を添付してください）</div>
+        <button class="btn-copy" onclick="copyPrompt()">📋 プロンプトをコピーする</button>
+        
+        <h3 style="margin-top: 20px;">2. サイトに読み込ませる</h3>
+        <ol>
+            <li>下にある青い枠線のエリアから、保存した「.csv」ファイルを選択します。</li>
+            <li>自動的に単語帳が生成され、学習をスタートできます。</li>
+        </ol>
+    </div>
 
     <div class="file-input-area" id="input-area">
-        <label for="csv-file" style="font-weight: bold; color: #555;">単語データのCSVファイルを選択:</label><br><br>
+        <label for="csv-file" style="font-weight: bold; color: #1a73e8; font-size: 16px;">作成したCSVファイルを選択してください：</label><br><br>
         <input type="file" id="csv-file" accept=".csv">
     </div>
 
@@ -218,6 +323,16 @@
         let currentWords = [];
         let currentMode = 'ej';
 
+        // プロンプトコピー機能
+        function copyPrompt() {
+            const promptText = document.getElementById('prompt-text').innerText;
+            navigator.clipboard.writeText(promptText).then(() => {
+                alert('プロンプトをクリップボードにコピーしました！Geminiにそのまま貼り付けてください。');
+            }).catch(err => {
+                alert('コピーに失敗しました。枠内のテキストを手動で選択してコピーしてください。');
+            });
+        }
+
         // CSVファイル読み込みイベントの監視
         document.getElementById('csv-file').addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -231,22 +346,20 @@
             reader.readAsText(file, 'UTF-8');
         });
 
-        // 簡易CSVパース処理
+        // CSVパース処理
         function parseCSV(text) {
             const lines = text.split(/\r\n|\n/);
             const parsedData = [];
             
-            // 1行目はヘッダー（no, en, ja）と仮定してスキップ
             for (let i = 1; i < lines.length; i++) {
                 if (lines[i].trim() === '') continue;
                 
-                // カンマで分割（単純カンマ区切りに対応。カンマを含む翻訳がある場合は""で囲まれていることを考慮）
                 const row = parseCSVRow(lines[i]);
                 if (row.length >= 3) {
                     parsedData.push({
                         no: row[0].trim(),
                         en: row[1].trim(),
-                        ja: row[2].trim()
+                        ja: row[2].trim().replace(/^"|"$/g, '') // 前後のダブルクォーテーションを削除
                     });
                 }
             }
@@ -255,18 +368,18 @@
                 originalWordData = parsedData;
                 currentWords = [...originalWordData];
                 
-                // 画面表示切り替え
+                // 画面表示切り替え（カードが見やすくなるようガイドとインプットを非表示に）
+                document.getElementById('guide-area').style.display = 'none';
                 document.getElementById('input-area').style.display = 'none';
                 document.getElementById('control-panel').style.display = 'block';
                 document.getElementById('status-msg').innerText = `全 ${currentWords.length} 語を読み込みました。カードをタップすると裏返ります。`;
                 
                 renderCards();
             } else {
-                alert('有効な単語データが読み込めませんでした。CSVの形式を確認してください。');
+                alert('有効な単語データが読み込めませんでした。CSVファイルの形式を確認してください。');
             }
         }
 
-        // カンマ区切りの文字列を配列に安全にパースする
         function parseCSVRow(line) {
             const result = [];
             let current = '';
